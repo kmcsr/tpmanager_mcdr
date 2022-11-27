@@ -1,5 +1,5 @@
 
-from typing import Dict
+from typing import Dict, List
 
 import mcdreforged.api.all as MCDR
 
@@ -19,12 +19,19 @@ BIG_BLOCK_AFTER = LazyData(lambda data:
 class TPMConfig(Config, msg_id=MSG_ID):
 	# 0:guest 1:user 2:helper 3:admin 4:owner
 	minimum_permission_level: Dict[str, int] = {
-		'help':      0,
-		'ask':       1,
-		'accept':    1,
-		'reject':    0,
+		'help':    0,
+		'pos':     2,
+		'ask':     1,
+		'askhere': 1,
+		'accept':  1,
+		'reject':  0,
 	}
-	teleport_command: str = 'tp {src} {dst}'
+	teleport_expiration: int = 10 # in seconds
+	teleport_commands: List[str] = [
+		'say Teleporting {src} to {dst} ...',
+		'tp {src} {dst}',
+	]
+	teleport_xyz_command: str = 'tp {name} {x} {y} {z}'
 
 def get_config():
 	return TPMConfig.instance

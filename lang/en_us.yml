@@ -1,6 +1,7 @@
 tpm:
   help_msg: |-
     {0} help :Show this help message
+    {0} pos <x> <y> <z> :Teleport to target position
     {0} ask :Teleport you to somebody
     {0} askhere :Teleport somebody to you
     {0} accept :Accept somebody's teleport ask

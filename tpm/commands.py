@@ -28,6 +28,10 @@ def register(server: MCDR.PluginServerInterface):
 		MCDR.Literal(Prefix).
 		runs(command_help).
 		then(cfg.literal('help').runs(command_help)).
+		then(cfg.literal('pos').
+			requires(lambda src: src.is_player, lambda: MCDR.RText('Only player can use this command', color=MCDR.RColor.red)).
+			then(MCDR.Float('x').then(MCDR.Float('y').then(MCDR.Float('z').
+			runs(lambda src, ctx: command_tppos(src, src.player, ctx['x'], ctx['y'], ctx['z'])))))).
 		then(tpa_node).
 		then(tph_node).
 		then(cfg.literal('accept').
@@ -43,15 +47,21 @@ def register(server: MCDR.PluginServerInterface):
 def command_help(source: MCDR.CommandSource):
 	send_message(source, BIG_BLOCK_BEFOR, tr('help_msg', Prefix), BIG_BLOCK_AFTER, sep='\n')
 
+def command_tppos(source: MCDR.CommandSource, player: str, x: float, y: float, z: float):
+	server = source.get_server()
+	cfg = get_config()
+	cmd = cfg.teleport_xyz_command.format(name=player, x=x, y=y, z=z)
+	server.execute(cmd)
+
 def command_ask(source: MCDR.CommandSource, target: str):
 	server = source.get_server()
 	name = source.player
 	cfg = get_config()
 	# TODO: check the target player exists
 	if not register_accept(target,
-		lambda: server.execute(cfg.teleport_command.format(src=name, dst=target)),
+		lambda: [server.execute(c.format(src=name, dst=target)) for c in cfg.teleport_commands],
 		lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
-		timeout=10):
+		timeout=cfg.teleport_expiration):
 		send_message(source, MSG_ID, MCDR.RText(tr('ask.already_have_req'), color=MCDR.RColor.red))
 		return
 	send_message(source, MSG_ID, tr('ask.sending'))
@@ -66,9 +76,9 @@ def command_askhere(source: MCDR.CommandSource, target: str):
 	cfg = get_config()
 	# TODO: check the target player exists
 	if not register_accept(target,
-		lambda: server.execute(cfg.teleport_command.format(src=target, dst=name)),
+		lambda: [server.execute(c.format(src=target, dst=name)) for c in cfg.teleport_commands],
 		lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
-		timeout=10):
+		timeout=cfg.teleport_expiration):
 		send_message(source, MSG_ID, MCDR.RText(tr('ask.already_have_req'), color=MCDR.RColor.red))
 		return
 	send_message(source, MSG_ID, tr('ask.sending'))
@@ -92,9 +102,12 @@ def __warp_call(call, c=None):
 		return call(*b[:call.__code__.co_argcount])
 	return w
 
-def register_accept(player: str, confirm_call, abort_call=lambda: 0, timeout: int = None, *, cover: bool = False):
+def register_accept(player: str, accept_call, reject_call=lambda: 0, timeout_call=lambda: 0, timeout: int = None, *, cover: bool = False):
 	if not cover and player in tpask_map:
 		return False
-	tmc = None if timeout is None else new_timer(timeout, lambda: tpask_map.pop(player, (0, lambda: 0))[1]()).cancel
-	tpask_map[player] = (__warp_call(confirm_call, tmc), __warp_call(abort_call, tmc))
+	tmc = None if timeout is None else new_timer(timeout, lambda: (
+		tpask_map.pop(player),
+		timeout_call()
+	)).cancel
+	tpask_map[player] = (__warp_call(accept_call, tmc), __warp_call(reject_call, tmc))
 	return True
