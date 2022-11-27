@@ -1,0 +1,19 @@
+{
+  "id": "tpm",
+  "version": "0.1.0",
+  "name": "LoginProxy",
+  "description": {
+    "en_us": "A Minecraft teleport manager",
+    "zh_cn": "一个Minecraft服务器传送管理"
+  },
+  "author": "zyxkad",
+  "link": "https://github.com/kmcsr/tpmanager_mcdr",
+  "dependencies": {
+    "mcdreforged": ">=2.0.0",
+    "kpi": ">=1.3.0"
+  },
+  "resources": [
+    "LICENSE",
+    "lang"
+  ]
+}

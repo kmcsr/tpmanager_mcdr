@@ -1,0 +1,17 @@
+tpm:
+  help_msg: |-
+    {0} help :Show this help message
+    {0} ask :Teleport you to somebody
+    {0} askhere :Teleport somebody to you
+    {0} accept :Accept somebody's teleport ask
+    {0} reject :Reject somebody's teleport ask
+  ask:
+    sending: Your teleport request is sending...
+    aborted: Your teleport ask was aborted
+    request_to: 'Player {0} asking teleport to you'
+    request_from: 'Player {0} asking you teleport to him'
+    already_have_req: 'Player {0} already have a teleport request'
+  word:
+    accept: ACCEPT
+    reject: REJECT
+    no_action: There are no any action in progess
