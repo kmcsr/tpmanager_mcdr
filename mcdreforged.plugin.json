@@ -1,7 +1,7 @@
 {
   "id": "tpm",
   "version": "0.1.0",
-  "name": "LoginProxy",
+  "name": "TpManager",
   "description": {
     "en_us": "A Minecraft teleport manager",
     "zh_cn": "一个Minecraft服务器传送管理"
