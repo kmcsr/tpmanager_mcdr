@@ -88,7 +88,7 @@ def command_askhere(source: MCDR.CommandSource, target: str):
 	))
 
 def command_accept(source: MCDR.CommandSource):
-	tpask_map.pop(source.player, (lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red), 0)))[0](source)
+	tpask_map.pop(source.player, (lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red)), 0))[0](source)
 
 def command_reject(source: MCDR.CommandSource):
 	tpask_map.pop(source.player, (0, lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))))[1](source)
