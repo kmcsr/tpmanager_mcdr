@@ -50,7 +50,8 @@ class Commands(PermCommandSet):
 	def help(self, source: MCDR.CommandSource):
 		send_message(source, BIG_BLOCK_BEFOR, tr('help_msg', Prefix), BIG_BLOCK_AFTER, sep='\n')
 
-	@Literal('pos', player_only=True)
+	@Literal('pos')
+	@player_only
 	def tppos(self, source: MCDR.PlayerCommandSource, x: float, y: float, z: float):
 		server = source.get_server()
 		player = source.player
@@ -58,7 +59,8 @@ class Commands(PermCommandSet):
 		cmd = cfg.teleport_xyz_command.format(name=player, x=x, y=y, z=z)
 		server.execute(cmd)
 
-	@Literal('ask', player_only=True)
+	@Literal('ask')
+	@player_only
 	def ask(self, source: MCDR.PlayerCommandSource, target: str):
 		server = source.get_server()
 		name = source.player
@@ -77,7 +79,8 @@ class Commands(PermCommandSet):
 			new_command('{} reject'.format(Prefix), '[{}]'.format(tr('word.reject')), color=MCDR.RColor.red),
 		))
 
-	@Literal('askhere', player_only=True)
+	@Literal('askhere')
+	@player_only
 	def askhere(self, source: MCDR.PlayerCommandSource, target: str):
 		server = source.get_server()
 		name = source.player
@@ -96,17 +99,20 @@ class Commands(PermCommandSet):
 			new_command('{} reject'.format(Prefix), '[{}]'.format(tr('word.reject')), color=MCDR.RColor.red),
 		))
 
-	@Literal('accept', player_only=True)
+	@Literal('accept')
+	@player_only
 	def accept(self, source: MCDR.PlayerCommandSource):
 		self.__tpask_map.pop(source.player,
 			(lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red)), 0) )[0](source)
 
-	@Literal('reject', player_only=True)
+	@Literal('reject')
+	@player_only
 	def reject(self, source: MCDR.PlayerCommandSource):
 		self.__tpask_map.pop(source.player,
 			(0, lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))) )[1](source)
 
-	@Literal('cancel', player_only=True)
+	@Literal('cancel')
+	@player_only
 	def cancel(self, source: MCDR.PlayerCommandSource):
 		self.__tpsender_map.pop(source.player,
 			lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red)))(source)
