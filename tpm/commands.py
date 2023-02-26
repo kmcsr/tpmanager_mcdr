@@ -51,7 +51,7 @@ class Commands(PermCommandSet):
 		send_message(source, BIG_BLOCK_BEFOR, tr('help_msg', Prefix), BIG_BLOCK_AFTER, sep='\n')
 
 	@Literal('pos', player_only=True)
-	def tppos(self, source: MCDR.PlayerCommandSource, x: float, y: Float[-10, 300], z: float):
+	def tppos(self, source: MCDR.PlayerCommandSource, x: float, y: float, z: float):
 		server = source.get_server()
 		player = source.player
 		cfg = get_config()
