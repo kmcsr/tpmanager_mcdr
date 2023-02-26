@@ -2,17 +2,21 @@ tpm:
   help_msg: |-
     {0} help :Show this help message
     {0} pos <x> <y> <z> :Teleport to target position
-    {0} ask :Teleport you to somebody
-    {0} askhere :Teleport somebody to you
-    {0} accept :Accept somebody's teleport ask
-    {0} reject :Reject somebody's teleport ask
+    {0} ask <player>:Teleport you to somebody
+    {0} askhere <player>:Teleport somebody to you
+    {0} accept :Accept teleport request
+    {0} reject :Reject teleport request
+    {0} cancel :Cancel your teleport request
   ask:
-    sending: Your teleport request is sending...
-    aborted: Your teleport ask was aborted
-    request_to: 'Player {0} asking teleport to you'
-    request_from: 'Player {0} asking you teleport to him'
-    already_have_req: 'Player {0} already have a teleport request'
+    sending: 'Your teleport request is sending to {0}...'
+    aborted: 'Your teleport request was aborted'
+    timeout: 'Your teleport request was timeouted'
+    request_to: 'Player {0} requests teleport to you'
+    request_from: 'Player {0} requests you to teleport to him'
+    player_req_exists: 'Player {0} already have a teleport request'
+    req_exists: 'You already have a teleport request in progess'
   word:
-    accept: ACCEPT
-    reject: REJECT
+    accept: ACC
+    reject: REJ
+    cancel: CAN
     no_action: There are no any action in progess

@@ -1,6 +1,6 @@
 {
   "id": "tpm",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "name": "TpManager",
   "description": {
     "en_us": "A Minecraft teleport manager",
@@ -10,7 +10,7 @@
   "link": "https://github.com/kmcsr/tpmanager_mcdr",
   "dependencies": {
     "mcdreforged": ">=2.0.0",
-    "kpi": ">=1.3.0"
+    "kpi": "~1.4.0"
   },
   "resources": [
     "LICENSE",

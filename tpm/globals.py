@@ -3,7 +3,7 @@ from typing import Dict, List
 
 import mcdreforged.api.all as MCDR
 
-from kpi.config import Config
+from kpi.config import *
 from .utils import *
 
 __all__ = [
@@ -18,14 +18,13 @@ BIG_BLOCK_AFTER = LazyData(lambda data:
 
 class TPMConfig(Config, msg_id=MSG_ID):
 	# 0:guest 1:user 2:helper 3:admin 4:owner
-	minimum_permission_level: Dict[str, int] = {
-		'help':    0,
-		'pos':     2,
-		'ask':     1,
-		'askhere': 1,
-		'accept':  1,
-		'reject':  0,
-	}
+	class minimum_permission_level(JSONObject):
+		pos: int     = 2
+		ask: int     = 1
+		askhere: int = 1
+		accept: int  = 1
+		reject: int  = 0
+		cancel: int  = 0
 	teleport_expiration: int = 10 # in seconds
 	teleport_commands: List[str] = [
 		'say Teleporting {src} to {dst} ...',

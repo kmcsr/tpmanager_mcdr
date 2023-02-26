@@ -1,6 +1,8 @@
 
 import mcdreforged.api.all as MCDR
 
+import kpi.command as command
+
 from .globals import *
 from .utils import *
 from .api import *
@@ -12,102 +14,126 @@ TphPrefix = '!!tph'
 def register(server: MCDR.PluginServerInterface):
 	cfg = get_config()
 	server.register_help_message(Prefix, 'TP manager help message')
-	server.register_help_message(TpaPrefix, 'Teleport to somebody')
-	server.register_help_message(TphPrefix, 'Teleport somebody here')
+	server.register_help_message(TpaPrefix, 'Teleport to player')
+	server.register_help_message(TphPrefix, 'Teleport player to you')
 
-	tpa_node = (cfg.literal('ask').
-		requires(lambda src: src.is_player, lambda: MCDR.RText('Only player can use this command', color=MCDR.RColor.red)).
-		then(MCDR.Text('name').runs(lambda src, ctx: command_ask(src, ctx['name'])))
-	)
-	tph_node = (cfg.literal('askhere').
-		requires(lambda src: src.is_player, lambda: MCDR.RText('Only player can use this command', color=MCDR.RColor.red)).
-		then(MCDR.Text('name').runs(lambda src, ctx: command_askhere(src, ctx['name'])))
-	)
+	Commands(Prefix, config=cfg).register_to(server)
 
 	server.register_command(
-		MCDR.Literal(Prefix).
-		runs(command_help).
-		then(cfg.literal('help').runs(command_help)).
-		then(cfg.literal('pos').
-			requires(lambda src: src.is_player, lambda: MCDR.RText('Only player can use this command', color=MCDR.RColor.red)).
-			then(MCDR.Float('x').then(MCDR.Float('y').then(MCDR.Float('z').
-			runs(lambda src, ctx: command_tppos(src, src.player, ctx['x'], ctx['y'], ctx['z'])))))).
-		then(tpa_node).
-		then(tph_node).
-		then(cfg.literal('accept').
-			requires(lambda src: src.is_player, lambda: MCDR.RText('Only player can use this command', color=MCDR.RColor.red)).
-			runs(command_accept)).
-		then(cfg.literal('reject').
-			requires(lambda src: src.is_player, lambda: MCDR.RText('Only player can use this command', color=MCDR.RColor.red)).
-			runs(command_reject))
-	)
-	server.register_command(MCDR.Literal(TpaPrefix).redirects(tpa_node))
-	server.register_command(MCDR.Literal(TphPrefix).redirects(tph_node))
+		require_player(
+			cfg.require_permission(
+				MCDR.Literal(TpaPrefix), 'ask')).
+		redirects(Commands.ask.base))
+	server.register_command(
+		require_player(
+			cfg.require_permission(
+				MCDR.Literal(TphPrefix), 'askhere')).
+			redirects(Commands.askhere.base))
 
-def command_help(source: MCDR.CommandSource):
-	send_message(source, BIG_BLOCK_BEFOR, tr('help_msg', Prefix), BIG_BLOCK_AFTER, sep='\n')
+class Commands(command.PermCommandSet):
+	def __init__(self, *args, config, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.__config = config
+		self.__tpask_map = {}
+		self.__tpsender_map = {}
 
-def command_tppos(source: MCDR.CommandSource, player: str, x: float, y: float, z: float):
-	server = source.get_server()
-	cfg = get_config()
-	cmd = cfg.teleport_xyz_command.format(name=player, x=x, y=y, z=z)
-	server.execute(cmd)
+	@property
+	def config(self):
+		return self.__config
 
-def command_ask(source: MCDR.CommandSource, target: str):
-	server = source.get_server()
-	name = source.player
-	cfg = get_config()
-	# TODO: check the target player exists
-	if not register_accept(target,
-		lambda: [server.execute(c.format(src=name, dst=target)) for c in cfg.teleport_commands],
-		lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
-		timeout=cfg.teleport_expiration):
-		send_message(source, MSG_ID, MCDR.RText(tr('ask.already_have_req'), color=MCDR.RColor.red))
-		return
-	send_message(source, MSG_ID, tr('ask.sending'))
-	server.tell(target, join_rtext(MSG_ID, tr('ask.request_to', name),
-		new_command('{} accept'.format(Prefix), '[{}]'.format(tr('word.accept')), color=MCDR.RColor.light_purple),
-		new_command('{} reject'.format(Prefix), '[{}]'.format(tr('word.reject')), color=MCDR.RColor.red),
-	))
+	def has_permission(self, src: MCDR.CommandSource, literal: str) -> bool:
+		return self.config.has_permission(src, literal)
 
-def command_askhere(source: MCDR.CommandSource, target: str):
-	server = source.get_server()
-	name = source.player
-	cfg = get_config()
-	# TODO: check the target player exists
-	if not register_accept(target,
-		lambda: [server.execute(c.format(src=target, dst=name)) for c in cfg.teleport_commands],
-		lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
-		timeout=cfg.teleport_expiration):
-		send_message(source, MSG_ID, MCDR.RText(tr('ask.already_have_req'), color=MCDR.RColor.red))
-		return
-	send_message(source, MSG_ID, tr('ask.sending'))
-	server.tell(target, join_rtext(MSG_ID, tr('ask.request_from', name),
-		new_command('{} accept'.format(Prefix), '[{}]'.format(tr('word.accept')), color=MCDR.RColor.light_purple),
-		new_command('{} reject'.format(Prefix), '[{}]'.format(tr('word.reject')), color=MCDR.RColor.red),
-	))
+	def help(self, source: MCDR.CommandSource):
+		send_message(source, BIG_BLOCK_BEFOR, tr('help_msg', Prefix), BIG_BLOCK_AFTER, sep='\n')
 
-def command_accept(source: MCDR.CommandSource):
-	tpask_map.pop(source.player, (lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red)), 0))[0](source)
+	@command.Literal('pos',
+		lambda src, ctx: (src, src.player, ctx['x'], ctx['y'], ctx['z']),
+		(MCDR.Float('x'), MCDR.Float('y'), MCDR.Float('z')), player_only=True)
+	def tppos(self, source: MCDR.PlayerCommandSource, player: str, x: float, y: float, z: float):
+		server = source.get_server()
+		cfg = get_config()
+		cmd = cfg.teleport_xyz_command.format(name=player, x=x, y=y, z=z)
+		server.execute(cmd)
 
-def command_reject(source: MCDR.CommandSource):
-	tpask_map.pop(source.player, (0, lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))))[1](source)
+	@command.Literal('ask',
+		lambda src, ctx: (src, ctx['name']),
+		(MCDR.Text('name'), ), player_only=True)
+	def ask(self, source: MCDR.PlayerCommandSource, target: str):
+		server = source.get_server()
+		name = source.player
+		cfg = get_config()
+		# TODO: check the target player exists
+		if not self.register_accept(source, target,
+			lambda: [server.execute(c.format(src=name, dst=target)) for c in cfg.teleport_commands],
+			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
+			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.timeout'), color=MCDR.RColor.red)),
+			timeout=cfg.teleport_expiration):
+			return
+		send_message(source, MSG_ID, tr('ask.sending', target),
+			new_command('{} cancel'.format(Prefix), '[{}]'.format(tr('word.cancel')), color=MCDR.RColor.yellow))
+		server.tell(target, join_rtext(MSG_ID, tr('ask.request_to', name),
+			new_command('{} accept'.format(Prefix), '[{}]'.format(tr('word.accept')), color=MCDR.RColor.light_purple),
+			new_command('{} reject'.format(Prefix), '[{}]'.format(tr('word.reject')), color=MCDR.RColor.red),
+		))
 
-tpask_map = {}
+	@command.Literal('askhere',
+		lambda src, ctx: (src, ctx['name']),
+		(MCDR.Text('name'), ), player_only=True)
+	def askhere(self, source: MCDR.PlayerCommandSource, target: str):
+		server = source.get_server()
+		name = source.player
+		cfg = get_config()
+		# TODO: check the target player exists
+		if not self.register_accept(source, target,
+			lambda: [server.execute(c.format(src=target, dst=name)) for c in cfg.teleport_commands],
+			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
+			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.timeout'), color=MCDR.RColor.red)),
+			timeout=cfg.teleport_expiration):
+			return
+		send_message(source, MSG_ID, tr('ask.sending', target),
+			new_command('{} cancel'.format(Prefix), '[{}]'.format(tr('word.cancel')), color=MCDR.RColor.yellow))
+		server.tell(target, join_rtext(MSG_ID, tr('ask.request_from', name),
+			new_command('{} accept'.format(Prefix), '[{}]'.format(tr('word.accept')), color=MCDR.RColor.light_purple),
+			new_command('{} reject'.format(Prefix), '[{}]'.format(tr('word.reject')), color=MCDR.RColor.red),
+		))
 
-def __warp_call(call, c=None):
-	def w(*b):
-		if c is not None:
-			c()
-		return call(*b[:call.__code__.co_argcount])
-	return w
+	@command.Literal('accept', player_only=True)
+	def accept(self, source: MCDR.PlayerCommandSource):
+		self.__tpask_map.pop(source.player,
+			(lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red)), 0) )[0](source)
 
-def register_accept(player: str, accept_call, reject_call=lambda: 0, timeout_call=lambda: 0, timeout: int = None, *, cover: bool = False):
-	if not cover and player in tpask_map:
-		return False
-	tmc = None if timeout is None else new_timer(timeout, lambda: (
-		tpask_map.pop(player),
-		timeout_call()
-	)).cancel
-	tpask_map[player] = (__warp_call(accept_call, tmc), __warp_call(reject_call, tmc))
-	return True
+	@command.Literal('reject', player_only=True)
+	def reject(self, source: MCDR.PlayerCommandSource):
+		self.__tpask_map.pop(source.player,
+			(0, lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))) )[1](source)
+
+	@command.Literal('cancel', player_only=True)
+	def cancel(self, source: MCDR.PlayerCommandSource):
+		self.__tpsend_map.pop(source.player,
+			lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red)))(source)
+
+	def register_accept(self, source: MCDR.PlayerCommandSource, target: str,
+		accept_call, reject_call=lambda: 0,
+		timeout_call=lambda: 0, timeout: int = None):
+		assert isinstance(source, MCDR.PlayerCommandSource)
+		assert callable(accept_call)
+		assert callable(reject_call)
+		assert callable(timeout_call)
+		if target in self.__tpask_map:
+			send_message(source, MSG_ID, MCDR.RText(tr('ask.player_req_exists', target), color=MCDR.RColor.red))
+			return False
+		name = source.player
+		if name in self.__tpsender_map:
+			send_message(source, MSG_ID, MCDR.RText(tr('ask.req_exists'), color=MCDR.RColor.red))
+			return False
+
+		tmc = (lambda: 0) if timeout is None else new_timer(timeout,
+			lambda: (self.__tpask_map.pop(target), self.__tpsender_map.pop(name), timeout_call())
+		).cancel
+		canceler = lambda: (tmc(), self.__tpsender_map.pop(name))
+		self.__tpask_map[target] = (
+			lambda *args: (canceler(), dyn_call(accept_call, *args)),
+			lambda *args: (canceler(), dyn_call(reject_call, *args)))
+		self.__tpsender_map[name] = lambda *args: (canceler(), dyn_call(reject_call, *args))
+		return True
