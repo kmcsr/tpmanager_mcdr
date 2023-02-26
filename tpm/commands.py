@@ -1,7 +1,7 @@
 
 import mcdreforged.api.all as MCDR
 
-import kpi.command as command
+from kpi.command import *
 
 from .globals import *
 from .utils import *
@@ -30,7 +30,10 @@ def register(server: MCDR.PluginServerInterface):
 				MCDR.Literal(TphPrefix), 'askhere')).
 			redirects(Commands.askhere.base))
 
-class Commands(command.PermCommandSet):
+class Commands(PermCommandSet):
+	Prefix = Prefix
+	HelpMessage = 'TP manager help message'
+
 	def __init__(self, *args, config, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.__config = config
@@ -47,18 +50,15 @@ class Commands(command.PermCommandSet):
 	def help(self, source: MCDR.CommandSource):
 		send_message(source, BIG_BLOCK_BEFOR, tr('help_msg', Prefix), BIG_BLOCK_AFTER, sep='\n')
 
-	@command.Literal('pos',
-		lambda src, ctx: (src, src.player, ctx['x'], ctx['y'], ctx['z']),
-		(MCDR.Float('x'), MCDR.Float('y'), MCDR.Float('z')), player_only=True)
-	def tppos(self, source: MCDR.PlayerCommandSource, player: str, x: float, y: float, z: float):
+	@Literal('pos', player_only=True)
+	def tppos(self, source: MCDR.PlayerCommandSource, x: float, y: Float[-10, 300], z: float):
 		server = source.get_server()
+		player = source.player
 		cfg = get_config()
 		cmd = cfg.teleport_xyz_command.format(name=player, x=x, y=y, z=z)
 		server.execute(cmd)
 
-	@command.Literal('ask',
-		lambda src, ctx: (src, ctx['name']),
-		(MCDR.Text('name'), ), player_only=True)
+	@Literal('ask', player_only=True)
 	def ask(self, source: MCDR.PlayerCommandSource, target: str):
 		server = source.get_server()
 		name = source.player
@@ -77,9 +77,7 @@ class Commands(command.PermCommandSet):
 			new_command('{} reject'.format(Prefix), '[{}]'.format(tr('word.reject')), color=MCDR.RColor.red),
 		))
 
-	@command.Literal('askhere',
-		lambda src, ctx: (src, ctx['name']),
-		(MCDR.Text('name'), ), player_only=True)
+	@Literal('askhere', player_only=True)
 	def askhere(self, source: MCDR.PlayerCommandSource, target: str):
 		server = source.get_server()
 		name = source.player
@@ -98,19 +96,19 @@ class Commands(command.PermCommandSet):
 			new_command('{} reject'.format(Prefix), '[{}]'.format(tr('word.reject')), color=MCDR.RColor.red),
 		))
 
-	@command.Literal('accept', player_only=True)
+	@Literal('accept', player_only=True)
 	def accept(self, source: MCDR.PlayerCommandSource):
 		self.__tpask_map.pop(source.player,
 			(lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red)), 0) )[0](source)
 
-	@command.Literal('reject', player_only=True)
+	@Literal('reject', player_only=True)
 	def reject(self, source: MCDR.PlayerCommandSource):
 		self.__tpask_map.pop(source.player,
 			(0, lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))) )[1](source)
 
-	@command.Literal('cancel', player_only=True)
+	@Literal('cancel', player_only=True)
 	def cancel(self, source: MCDR.PlayerCommandSource):
-		self.__tpsend_map.pop(source.player,
+		self.__tpsender_map.pop(source.player,
 			lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red)))(source)
 
 	def register_accept(self, source: MCDR.PlayerCommandSource, target: str,
@@ -135,5 +133,5 @@ class Commands(command.PermCommandSet):
 		self.__tpask_map[target] = (
 			lambda *args: (canceler(), dyn_call(accept_call, *args)),
 			lambda *args: (canceler(), dyn_call(reject_call, *args)))
-		self.__tpsender_map[name] = lambda *args: (canceler(), dyn_call(reject_call, *args))
+		self.__tpsender_map[name] = lambda *args: (tmc(), self.__tpask_map.pop(target), dyn_call(reject_call, *args))
 		return True
