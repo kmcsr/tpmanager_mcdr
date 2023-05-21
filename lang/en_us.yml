@@ -3,7 +3,9 @@ tpm:
     {0} help :Show this help message
     {0} pos <x> <y> <z> :Teleport to target position
     {0} ask <player>:Teleport you to somebody
+      aka {tpa}
     {0} askhere <player>:Teleport somebody to you
+      aka {tph}
     {0} accept :Accept teleport request
     {0} reject :Reject teleport request
     {0} cancel :Cancel your teleport request

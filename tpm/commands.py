@@ -13,9 +13,6 @@ TphPrefix = '!!tph'
 
 def register(server: MCDR.PluginServerInterface):
 	cfg = get_config()
-	server.register_help_message(Prefix, 'TP manager help message')
-	server.register_help_message(TpaPrefix, 'Teleport to player')
-	server.register_help_message(TphPrefix, 'Teleport player to you')
 
 	Commands(Prefix, config=cfg).register_to(server)
 
@@ -29,6 +26,8 @@ def register(server: MCDR.PluginServerInterface):
 			cfg.require_permission(
 				MCDR.Literal(TphPrefix), 'askhere')).
 			redirects(Commands.askhere.base))
+	server.register_help_message(TpaPrefix, 'Teleport to player')
+	server.register_help_message(TphPrefix, 'Teleport player to you')
 
 class Commands(PermCommandSet):
 	Prefix = Prefix
@@ -48,15 +47,14 @@ class Commands(PermCommandSet):
 		return self.config.has_permission(src, literal)
 
 	def help(self, source: MCDR.CommandSource):
-		send_message(source, BIG_BLOCK_BEFOR, tr('help_msg', Prefix), BIG_BLOCK_AFTER, sep='\n')
+		send_message(source, BIG_BLOCK_BEFOR, tr('help_msg', Prefix, tpa=TpaPrefix, tph=TphPrefix), BIG_BLOCK_AFTER, sep='\n')
 
 	@Literal('pos')
 	@player_only
 	def tppos(self, source: MCDR.PlayerCommandSource, x: float, y: float, z: float):
 		server = source.get_server()
 		player = source.player
-		cfg = get_config()
-		cmd = cfg.teleport_xyz_command.format(name=player, x=x, y=y, z=z)
+		cmd = self.config.teleport_xyz_command.format(name=player, x=x, y=y, z=z)
 		server.execute(cmd)
 
 	@Literal('ask')
@@ -64,13 +62,12 @@ class Commands(PermCommandSet):
 	def ask(self, source: MCDR.PlayerCommandSource, target: str):
 		server = source.get_server()
 		name = source.player
-		cfg = get_config()
 		# TODO: check the target player exists
 		if not self.register_accept(source, target,
-			lambda: [server.execute(c.format(src=name, dst=target)) for c in cfg.teleport_commands],
+			lambda: self.execute_teleport_commands(server, target, name),
 			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
 			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.timeout'), color=MCDR.RColor.red)),
-			timeout=cfg.teleport_expiration):
+			timeout=self.config.teleport_expiration):
 			return
 		send_message(source, MSG_ID, tr('ask.sending', target),
 			new_command('{} cancel'.format(Prefix), '[{}]'.format(tr('word.cancel')), color=MCDR.RColor.yellow))
@@ -79,18 +76,21 @@ class Commands(PermCommandSet):
 			new_command('{} reject'.format(Prefix), '[{}]'.format(tr('word.reject')), color=MCDR.RColor.red),
 		))
 
-	@Literal('askhere')
+	def execute_teleport_commands(self, server: MCDR.ServerInterface, target: str, name: str):
+		for c in self.config.teleport_commands:
+			server.execute(c.format(src=target, dst=name))
+
+	@Literal(['askhere', 'here'])
 	@player_only
 	def askhere(self, source: MCDR.PlayerCommandSource, target: str):
 		server = source.get_server()
 		name = source.player
-		cfg = get_config()
 		# TODO: check the target player exists
 		if not self.register_accept(source, target,
-			lambda: [server.execute(c.format(src=target, dst=name)) for c in cfg.teleport_commands],
+			lambda: self.execute_teleport_commands(server, target, name),
 			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
 			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.timeout'), color=MCDR.RColor.red)),
-			timeout=cfg.teleport_expiration):
+			timeout=self.config.teleport_expiration):
 			return
 		send_message(source, MSG_ID, tr('ask.sending', target),
 			new_command('{} cancel'.format(Prefix), '[{}]'.format(tr('word.cancel')), color=MCDR.RColor.yellow))
@@ -99,31 +99,40 @@ class Commands(PermCommandSet):
 			new_command('{} reject'.format(Prefix), '[{}]'.format(tr('word.reject')), color=MCDR.RColor.red),
 		))
 
-	@Literal('accept')
+	@Literal(['accept', 'acc'])
 	@player_only
 	def accept(self, source: MCDR.PlayerCommandSource):
-		self.__tpask_map.pop(source.player,
-			(lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red)), 0) )[0](source)
+		cbs = self.__tpask_map.pop(source.player, None)
+		if cbs is None:
+			send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
+			return
+		cbs[0](source)
 
-	@Literal('reject')
+	@Literal(['reject', 'r'])
 	@player_only
 	def reject(self, source: MCDR.PlayerCommandSource):
-		self.__tpask_map.pop(source.player,
-			(0, lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))) )[1](source)
+		cbs = self.__tpask_map.pop(source.player, None)
+		if cbs is None:
+			send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
+			return
+		cbs[1](source)
 
-	@Literal('cancel')
+	@Literal(['cancel', 'c'])
 	@player_only
 	def cancel(self, source: MCDR.PlayerCommandSource):
-		self.__tpsender_map.pop(source.player,
-			lambda s: send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red)))(source)
+		cb = self.__tpsender_map.pop(source.player, None)
+		if cb is None:
+			send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
+			return
+		cb(source)
 
 	def register_accept(self, source: MCDR.PlayerCommandSource, target: str,
-		accept_call, reject_call=lambda: 0,
-		timeout_call=lambda: 0, timeout: int = None):
-		assert isinstance(source, MCDR.PlayerCommandSource)
+		accept_call, reject_call=None,
+		timeout_call=None, timeout: int | None = None) -> bool:
+		assert_instanceof(source, MCDR.PlayerCommandSource)
 		assert callable(accept_call)
-		assert callable(reject_call)
-		assert callable(timeout_call)
+		assert reject_call is None or callable(reject_call)
+		assert timeout_call is None or callable(timeout_call)
 		if target in self.__tpask_map:
 			send_message(source, MSG_ID, MCDR.RText(tr('ask.player_req_exists', target), color=MCDR.RColor.red))
 			return False
@@ -132,12 +141,33 @@ class Commands(PermCommandSet):
 			send_message(source, MSG_ID, MCDR.RText(tr('ask.req_exists'), color=MCDR.RColor.red))
 			return False
 
-		tmc = (lambda: 0) if timeout is None else new_timer(timeout,
-			lambda: (self.__tpask_map.pop(target), self.__tpsender_map.pop(name), timeout_call())
-		).cancel
-		canceler = lambda: (tmc(), self.__tpsender_map.pop(name))
-		self.__tpask_map[target] = (
-			lambda *args: (canceler(), dyn_call(accept_call, *args)),
-			lambda *args: (canceler(), dyn_call(reject_call, *args)))
-		self.__tpsender_map[name] = lambda *args: (tmc(), self.__tpask_map.pop(target), dyn_call(reject_call, *args))
+		def timeout_cb():
+			self.__tpask_map.pop(target)
+			self.__tpsender_map.pop(name)
+			if timeout_call is not None:
+				timeout_call()
+		timer = None if timeout is None else new_timer(timeout, timeout_cb)
+
+		def accept_cb(*args):
+			if timer is not None:
+				timer.cancel()
+			self.__tpsender_map.pop(name)
+			dyn_call(accept_call, *args)
+
+		def reject_cb(*args):
+			if timer is not None:
+				timer.cancel()
+			self.__tpsender_map.pop(name)
+			if reject_call is not None:
+				dyn_call(reject_call, *args)
+
+		def cancel_cb(*args):
+			if timer is not None:
+				timer.cancel()
+			self.__tpask_map.pop(target)
+			if reject_call is not None:
+				dyn_call(reject_call, *args)
+
+		self.__tpask_map[target] = (accept_cb, reject_cb)
+		self.__tpsender_map[name] = cancel_cb
 		return True
