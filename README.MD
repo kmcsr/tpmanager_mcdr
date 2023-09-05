@@ -29,11 +29,11 @@
 |------------------------|-----|
 | `!!tp help`            | Show help message, aka `!!tp` |
 | `!!tp pos <x> <y> <z>` | Teleport to `<x>`, `<y>`, `<z>` |
-| `!!lp ask <name>`      | Send an teleport request |
-| `!!lp askhere <name>`  | Send an teleport request to here |
-| `!!lp accept`          | Accept the teleport request |
-| `!!lp reject`          | Reject the teleport request |
-| `!!lp cancel`          | Cancel your teleport request |
+| `!!tp ask <name>`      | Send an teleport request, aka `!!tpa` |
+| `!!tp askhere <name>`  | Send an teleport request to here, aka `!!tph` |
+| `!!tp accept`          | Accept the teleport request |
+| `!!tp reject`          | Reject the teleport request |
+| `!!tp cancel`          | Cancel your teleport request |
 
 ## Config files
 

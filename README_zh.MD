@@ -29,11 +29,11 @@
 |------------------------|-----|
 | `!!tp help`            | 显示帮助信息, `!!tp`同 |
 | `!!tp pos <x> <y> <z>` | 传送到`<x>`, `<y>`, `<z>` |
-| `!!lp ask <name>`      | 请求传送到玩家 |
-| `!!lp askhere <name>`  | 请求玩家传送到你 |
-| `!!lp accept`          | 同意传送请求 |
-| `!!lp reject`          | 拒绝传送请求 |
-| `!!lp cancel`          | 取消传送请求 |
+| `!!tp ask <name>`      | 请求传送到玩家, `!!tpa`同 |
+| `!!tp askhere <name>`  | 请求玩家传送到你, `!!tph`同 |
+| `!!tp accept`          | 同意传送请求 |
+| `!!tp reject`          | 拒绝传送请求 |
+| `!!tp cancel`          | 取消传送请求 |
 
 ## 配置文件
 
