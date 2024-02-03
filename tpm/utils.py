@@ -5,7 +5,7 @@ from kpi.utils import *
 
 __all__ = [
 	'new_thread', 'tr', 'debug', 'log_info', 'log_warn', 'log_error',
-	'get_server_instance',
+	'get_server_instance', 'dyn_call',
 	'new_timer', 'new_command', 'join_rtext', 'send_message', 'broadcast_message',
 	'assert_instanceof', 'require_player',
 ]
