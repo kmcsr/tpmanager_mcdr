@@ -25,6 +25,7 @@ class TPMConfig(Config, msg_id=MSG_ID):
 		accept: int  = 1
 		reject: int  = 0
 		cancel: int  = 0
+	teleport_cooldown: int = 60 # in seconds
 	teleport_expiration: int = 10 # in seconds
 	teleport_commands: List[str] = [
 		'say Teleporting {src} to {dst} ...',

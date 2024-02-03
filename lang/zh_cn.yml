@@ -17,6 +17,7 @@ tpm:
     request_from: '玩家{0}请求您传送到他'
     player_req_exists: '玩家{0}已经有传送请求了'
     req_exists: '你已经有传送请求了'
+    cooldown: '传送冷却中, 剩余{0}秒'
   word:
     accept: 同意
     reject: 拒绝

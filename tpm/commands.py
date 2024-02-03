@@ -1,6 +1,8 @@
 
 import mcdreforged.api.all as MCDR
 
+import time
+
 from kpi.command import *
 
 from .globals import *
@@ -38,6 +40,7 @@ class Commands(PermCommandSet):
 		self.__config = config
 		self.__tpask_map = {}
 		self.__tpsender_map = {}
+		self.__last_teleports: dict[str, float] = {}
 
 	@property
 	def config(self):
@@ -54,6 +57,14 @@ class Commands(PermCommandSet):
 	def tppos(self, source: MCDR.PlayerCommandSource, x: float, y: float, z: float):
 		server = source.get_server()
 		player = source.player
+		cooldown = self.config.teleport_cooldown
+		if cooldown > 0:
+			now = time.time()
+			remain = self.__last_teleports.get(player, 0) + cooldown - now
+			if remain > 0:
+				send_message(source, MSG_ID, MCDR.RText(tr('ask.cooldown', round(remain)), color=MCDR.RColor.red))
+				return
+			self.__last_teleports[player] = now
 		cmd = self.config.teleport_xyz_command.format(name=player, x=x, y=y, z=z)
 		server.execute(cmd)
 

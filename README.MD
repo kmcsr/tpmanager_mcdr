@@ -49,6 +49,7 @@
         "reject": 0,
         "cancel": 0
     },
+    "teleport_cooldown": 60, // in sec, the minimum teleport operation interval
     "teleport_expiration": 10, // in sec, the teleport request expiration
     "teleport_commands": [ // Command list for teleport players
         "say Teleporting {src} to {dst} ...",

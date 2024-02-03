@@ -49,6 +49,7 @@
         "reject": 0,
         "cancel": 0
     },
+    "teleport_cooldown": 60, // 秒, 传送冷却
     "teleport_expiration": 10, // 秒, 传送请求过期时间
     "teleport_commands": [ // 用于传送到玩家的指令集
         "say Teleporting {src} to {dst} ...",
