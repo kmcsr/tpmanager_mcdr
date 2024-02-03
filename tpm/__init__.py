@@ -9,7 +9,7 @@ from . import api
 
 __all__ = []
 
-export_pkg(globals_(), api)
+__all__.extend(api.__all__)
 
 def on_load(server: MCDR.PluginServerInterface, prev_module):
 	if prev_module is None:

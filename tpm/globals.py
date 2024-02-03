@@ -4,6 +4,7 @@ from typing import Dict, List
 import mcdreforged.api.all as MCDR
 
 from kpi.config import *
+from kpi.utils import LazyData
 from .utils import *
 
 __all__ = [

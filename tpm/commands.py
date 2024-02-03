@@ -115,7 +115,7 @@ class Commands(PermCommandSet):
 	def accept(self, source: MCDR.PlayerCommandSource):
 		cbs = self.__tpask_map.pop(source.player, None)
 		if cbs is None:
-			send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
+			send_message(source, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
 			return
 		cbs[0](source)
 
@@ -124,7 +124,7 @@ class Commands(PermCommandSet):
 	def reject(self, source: MCDR.PlayerCommandSource):
 		cbs = self.__tpask_map.pop(source.player, None)
 		if cbs is None:
-			send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
+			send_message(source, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
 			return
 		cbs[1](source)
 
@@ -133,7 +133,7 @@ class Commands(PermCommandSet):
 	def cancel(self, source: MCDR.PlayerCommandSource):
 		cb = self.__tpsender_map.pop(source.player, None)
 		if cb is None:
-			send_message(s, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
+			send_message(source, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
 			return
 		cb(source)
 
