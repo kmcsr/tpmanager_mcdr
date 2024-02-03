@@ -89,7 +89,7 @@ class Commands(PermCommandSet):
 
 	def execute_teleport_commands(self, server: MCDR.ServerInterface, target: str, name: str):
 		for c in self.config.teleport_commands:
-			server.execute(c.format(src=target, dst=name))
+			server.execute(c.format(src=name, dst=target))
 
 	@Literal(['askhere', 'here'])
 	@player_only
