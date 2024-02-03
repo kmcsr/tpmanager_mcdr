@@ -22,12 +22,12 @@ def register(server: MCDR.PluginServerInterface):
 		require_player(
 			cfg.require_permission(
 				MCDR.Literal(TpaPrefix), 'ask')).
-		redirects(Commands.ask.base))
+		redirects(Commands.ask.node))
 	server.register_command(
 		require_player(
 			cfg.require_permission(
 				MCDR.Literal(TphPrefix), 'askhere')).
-			redirects(Commands.askhere.base))
+			redirects(Commands.askhere.node))
 	server.register_help_message(TpaPrefix, 'Teleport to player')
 	server.register_help_message(TphPrefix, 'Teleport player to you')
 
