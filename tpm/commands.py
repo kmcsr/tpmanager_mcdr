@@ -98,7 +98,7 @@ class Commands(PermCommandSet):
 		name = source.player
 		# TODO: check the target player exists
 		if not self.register_accept(source, target,
-			lambda: self.execute_teleport_commands(server, target, name),
+			lambda: self.execute_teleport_commands(server, name, target),
 			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
 			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.timeout'), color=MCDR.RColor.red)),
 			timeout=self.config.teleport_expiration):
