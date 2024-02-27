@@ -13,7 +13,6 @@
 ## TODO
 
 - 检查目标玩家是否存在
-- 传送冷却
 - 管理游戏内路径点功能
 - 与login_proxy联动?
 
@@ -38,6 +37,9 @@
 ## 配置文件
 
 #### tpm/config.json
+
+注意, 有些服务器执行 `teleport_xyz_command` 时会把在其他维度的玩家传送到主世界.  
+将指令更改为 `execute at {name} run tp {name} {x} {y} {z}` 即可解决该问题
 
 ```javascript
 {

@@ -13,7 +13,6 @@
 ## TODO
 
 - Check if target player exists
-- Teleport cooldown
 - Manage in game way points
 - Linking with login_proxy?
 
