@@ -42,9 +42,8 @@ def init(server: MCDR.PluginServerInterface):
 	metadata = server.get_self_metadata()
 	LazyData.load(BIG_BLOCK_BEFOR, metadata)
 	LazyData.load(BIG_BLOCK_AFTER, metadata)
-	TPMConfig.init_instance(server, load_after_init=True)
+	cfg = TPMConfig.init_instance(server, load_after_init=True)
+	cfg.save()
 
 def destory(server: MCDR.PluginServerInterface):
-	cfg = get_config()
-	if cfg is not None:
-		cfg.save()
+	pass
