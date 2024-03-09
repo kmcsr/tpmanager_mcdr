@@ -18,6 +18,8 @@ tpm:
     player_req_exists: 'Player {0} already have a teleport request'
     req_exists: 'You already have a teleport request in progess'
     cooldown: 'Teleporter in cooldown, {0} seconds remaining'
+    noplayer: 'Cannot find it anywhere! That player is not in the domain.'
+    tpself: 'Oops! You can't tp to yourself.'
   word:
     accept: ACC
     reject: REJ

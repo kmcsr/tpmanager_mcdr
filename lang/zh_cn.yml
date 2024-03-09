@@ -18,6 +18,8 @@ tpm:
     player_req_exists: '玩家{0}已经有传送请求了'
     req_exists: '你已经有传送请求了'
     cooldown: '传送冷却中, 剩余{0}秒'
+    noplayer: '找不到，根本找不到！定义域不存在该玩家。'
+    tpself: '诶呀，无法传送到自己~'
   word:
     accept: 同意
     reject: 拒绝

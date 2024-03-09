@@ -4,6 +4,7 @@ import mcdreforged.api.all as MCDR
 import time
 
 from kpi.command import *
+from online_player_api import *
 
 from .globals import *
 from .utils import *
@@ -73,7 +74,14 @@ class Commands(PermCommandSet):
 	def ask(self, source: MCDR.PlayerCommandSource, target: str):
 		server = source.get_server()
 		name = source.player
+		if name == target:
+			send_message(source, MSG_ID, MCDR.RText(tr('ask.tpself'), color=MCDR.RColor.red))
+			return
+		if not check_online(target):
+			send_message(source, MSG_ID, MCDR.RText(tr('ask.noplayer'), color=MCDR.RColor.red))
+			return
 		# TODO: check the target player exists
+		# ANS: Done.
 		if not self.register_accept(source, target,
 			lambda: self.execute_teleport_commands(server, target, name),
 			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
@@ -96,7 +104,14 @@ class Commands(PermCommandSet):
 	def askhere(self, source: MCDR.PlayerCommandSource, target: str):
 		server = source.get_server()
 		name = source.player
+		if name == target:
+			send_message(source, MSG_ID, MCDR.RText(tr('ask.tpself'), color=MCDR.RColor.red))
+			return
+		if not check_online(target):
+			send_message(source, MSG_ID, MCDR.RText(tr('ask.noplayer'), color=MCDR.RColor.red))
+			return
 		# TODO: check the target player exists
+		# ANS: Also done.
 		if not self.register_accept(source, target,
 			lambda: self.execute_teleport_commands(server, name, target),
 			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
