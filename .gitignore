@@ -11,3 +11,8 @@
 # python
 __pycache__
 /*_cache
+
+# a PRer's gitignore
+/OnlinePlayerAPI-v1.0.0/
+/KPI-v1.4.9/
+.vscode
