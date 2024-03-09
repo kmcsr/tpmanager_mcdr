@@ -128,7 +128,7 @@ class Commands(PermCommandSet):
 	@Literal(['accept', 'acc'])
 	@player_only
 	def accept(self, source: MCDR.PlayerCommandSource):
-		cbs = self.__tpask_map.pop(source.player, None)
+		cbs = self.__tpask_map.pop(source.player.lower(), None)
 		if cbs is None:
 			send_message(source, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
 			return
@@ -137,7 +137,7 @@ class Commands(PermCommandSet):
 	@Literal(['reject', 'r'])
 	@player_only
 	def reject(self, source: MCDR.PlayerCommandSource):
-		cbs = self.__tpask_map.pop(source.player, None)
+		cbs = self.__tpask_map.pop(source.player.lower(), None)
 		if cbs is None:
 			send_message(source, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
 			return
@@ -146,7 +146,7 @@ class Commands(PermCommandSet):
 	@Literal(['cancel', 'c'])
 	@player_only
 	def cancel(self, source: MCDR.PlayerCommandSource):
-		cb = self.__tpsender_map.pop(source.player, None)
+		cb = self.__tpsender_map.pop(source.player.lower(), None)
 		if cb is None:
 			send_message(source, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
 			return
@@ -159,17 +159,17 @@ class Commands(PermCommandSet):
 		assert callable(accept_call)
 		assert reject_call is None or callable(reject_call)
 		assert timeout_call is None or callable(timeout_call)
-		if target in self.__tpask_map:
+		if target.lower() in self.__tpask_map:
 			send_message(source, MSG_ID, MCDR.RText(tr('ask.player_req_exists', target), color=MCDR.RColor.red))
 			return False
 		name = source.player
-		if name in self.__tpsender_map:
+		if name.lower() in self.__tpsender_map:
 			send_message(source, MSG_ID, MCDR.RText(tr('ask.req_exists'), color=MCDR.RColor.red))
 			return False
 
 		def timeout_cb():
-			self.__tpask_map.pop(target)
-			self.__tpsender_map.pop(name)
+			self.__tpask_map.pop(target.lower())
+			self.__tpsender_map.pop(name.lower())
 			if timeout_call is not None:
 				timeout_call()
 		timer = None if timeout is None else new_timer(timeout, timeout_cb)
@@ -177,23 +177,23 @@ class Commands(PermCommandSet):
 		def accept_cb(*args):
 			if timer is not None:
 				timer.cancel()
-			self.__tpsender_map.pop(name)
+			self.__tpsender_map.pop(name.lower())
 			dyn_call(accept_call, *args)
 
 		def reject_cb(*args):
 			if timer is not None:
 				timer.cancel()
-			self.__tpsender_map.pop(name)
+			self.__tpsender_map.pop(name.lower())
 			if reject_call is not None:
 				dyn_call(reject_call, *args)
 
 		def cancel_cb(*args):
 			if timer is not None:
 				timer.cancel()
-			self.__tpask_map.pop(target)
+			self.__tpask_map.pop(target.lower())
 			if reject_call is not None:
 				dyn_call(reject_call, *args)
 
-		self.__tpask_map[target] = (accept_cb, reject_cb)
-		self.__tpsender_map[name] = cancel_cb
+		self.__tpask_map[target.lower()] = (accept_cb, reject_cb)
+		self.__tpsender_map[name.lower()] = cancel_cb
 		return True
