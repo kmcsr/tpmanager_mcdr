@@ -73,6 +73,11 @@ class Commands(PermCommandSet):
 	def ask(self, source: MCDR.PlayerCommandSource, target: str):
 		server = source.get_server()
 		name = source.player
+		# 判断target是否的名字是否以bot_开头
+		if target.startswith('bot_'):
+			# 如果是，则直接执行传送命令
+			self.execute_teleport_commands(server, target, name)
+			return
 		# TODO: check the target player exists
 		if not self.register_accept(source, target,
 			lambda: self.execute_teleport_commands(server, target, name),
@@ -82,6 +87,8 @@ class Commands(PermCommandSet):
 			return
 		send_message(source, MSG_ID, tr('ask.sending', target),
 			new_command('{} cancel'.format(Prefix), '[{}]'.format(tr('word.cancel')), color=MCDR.RColor.yellow))
+		
+
 		server.tell(target, join_rtext(MSG_ID, tr('ask.request_to', name),
 			new_command('{} accept'.format(Prefix), '[{}]'.format(tr('word.accept')), color=MCDR.RColor.light_purple),
 			new_command('{} reject'.format(Prefix), '[{}]'.format(tr('word.reject')), color=MCDR.RColor.red),
