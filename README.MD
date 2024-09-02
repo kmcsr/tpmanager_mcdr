@@ -24,6 +24,9 @@
 
 ## Commands
 
+> [!TIP]
+> Some other plugins also registered `!!tp` as root command. To avoid conflict, you also can use `!!tpm` to replace `!!tp`
+
 |         Command format | Introduction |
 |------------------------|-----|
 | `!!tp help`            | Show help message, aka `!!tp` |

@@ -10,6 +10,7 @@ from .utils import *
 from .api import *
 
 Prefix = '!!tp'
+AlternativePrefix = '!!tpm'
 TpaPrefix = '!!tpa'
 TphPrefix = '!!tph'
 
@@ -17,6 +18,9 @@ def register(server: MCDR.PluginServerInterface):
 	cfg = get_config()
 
 	Commands(Prefix, config=cfg).register_to(server)
+
+	server.register_command(
+		MCDR.Literal(AlternativePrefix).redirects(Commands.node))
 
 	server.register_command(
 		require_player(
