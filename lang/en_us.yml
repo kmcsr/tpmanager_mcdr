@@ -18,15 +18,19 @@ tpm:
     player_req_exists: 'Player {0} already have a teleport request'
     req_exists: 'You already have a teleport request in progess'
     cooldown: 'Teleporter in cooldown, {0} seconds remaining'
+    player_not_online: '[WARN] Player {0} is not online'
   word:
     accept: ACC
     reject: REJ
     cancel: CAN
     no_action: There are no any action in progess
-  tp:
-    player_not_exists: '[WARN] Player {0} is not online'
   warp:
     point: '{name} - [X: {x}, Y: {y}, Z: {z}, D: {dimension}]'
     points:
       full: 'Warp point slot is full'
       exists: 'Warp point {0} is already exists'
+      not_exists: 'Warp point {0} is not exists'
+    teleporting: 'Teleporing to {name}'
+    created: 'Warp point {0} created'
+    updated: 'Warp point {0} updated'
+    removed: 'Removed warp point {0}'
