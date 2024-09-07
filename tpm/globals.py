@@ -1,5 +1,6 @@
 
-from typing import Dict, List
+import typing
+from typing import Dict, List, Optional, ClassVar, Self
 
 import mcdreforged.api.all as MCDR
 
@@ -53,6 +54,7 @@ class WarpPoint(JSONObject):
 	name: str
 	permission: int = 1
 
+@typing.final
 class WarpPoints(JSONStorage):
 	_instance: ClassVar[Optional[Self]] = None
 

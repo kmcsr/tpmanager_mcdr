@@ -1,6 +1,6 @@
 
 import time
-from typing import TypeVar
+from typing import Callable, TypeVar
 
 import mcdreforged.api.all as MCDR
 
@@ -17,11 +17,14 @@ TphPrefix = '!!tph'
 
 def register(server: MCDR.PluginServerInterface):
 	cfg = get_config()
+	points = WarpPoints.instance()
+	assert points
 
-	Commands(Prefix, config=cfg, points=WarpPoints.instance()).register_to(server)
+	cmd = Commands(Prefix, config=cfg, points=points)
+	cmd.register_to(server)
 
 	server.register_command(
-		MCDR.Literal(AlternativePrefix).redirects(Commands.node))
+		MCDR.Literal(AlternativePrefix).redirects(cmd.node))
 
 	server.register_command(
 		require_player(
@@ -42,12 +45,12 @@ class Commands(PermCommandSet):
 	Prefix = Prefix
 	HelpMessage = 'TP manager help message'
 
-	def __init__(self, *args, config, points, **kwargs):
+	def __init__(self, *args, config: TPMConfig, points: WarpPoints, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.__config = config
 		self.__points = points
-		self.__tpask_map = {}
-		self.__tpsender_map = {}
+		self.__tpask_map: dict[str, tuple[Callable, Callable]] = {}
+		self.__tpsender_map: dict[str, Callable] = {}
 		self.__last_teleports: dict[str, float] = {}
 
 	@property
@@ -55,7 +58,7 @@ class Commands(PermCommandSet):
 		return self.__config
 
 	@property
-	def points() -> WarpPoints:
+	def points(self) -> WarpPoints:
 		return self.__points
 
 	def has_permission(self, src: MCDR.CommandSource, literal: str) -> bool:
@@ -152,11 +155,12 @@ class Commands(PermCommandSet):
 		cb(source)
 
 	def _has_warp_permission(self, source: MCDR.CommandSource, point: WarpPoint) -> bool:
-		return source.has_permission(point.permission) or source.is_player and source.player.lower() == point.creator.lower()
+		return source.has_permission(point.permission) or (isinstance(source, MCDR.PlayerCommandSource) and source.player.lower() == point.creator.lower())
 
 	@Literal(['warp', 'w'])
 	@player_only
 	def warp(self, source: MCDR.PlayerCommandSource, name: str):
+		server = source.get_server()
 		point = self.points.get_point(name)
 		if point is None:
 			send_message(source, MCDR.RText(tr('warp.points.not_exists'), color=MCDR.RColor.red))
@@ -165,28 +169,32 @@ class Commands(PermCommandSet):
 			send_message(source, MCDR.RText(tr('warp.points.no_permission'), color=MCDR.RColor.red))
 			return
 		send_message(source, MCDR.RText(tr('warp.teleporting', name=point.name), color=MCDR.RColor.light_purple))
-		cmd = self.config.teleport_dim_xyz_command.format(name=player, x=point.x, y=point.y, z=point.z, dimension=point.dimension)
+		cmd = self.config.teleport_dim_xyz_command.format(name=source.player, x=point.x, y=point.y, z=point.z, dimension=point.dimension)
 		server.execute(cmd)
 
 	@Literal(['warps', 'ws'])
 	class warps(PermCommandSet):
 		def has_permission(self, src: MCDR.CommandSource, literal: str) -> bool:
+			assert isinstance(self.rootset, Commands)
 			return self.rootset.config.has_permission(src, 'warp_' + literal)
 
 		def has_force_permission(self, src: MCDR.CommandSource) -> bool:
+			assert isinstance(self.rootset, Commands)
 			return self.rootset.config.has_permission(src, 'warp_config')
 
 		@property
 		def points(self) -> WarpPoints:
+			assert isinstance(self.rootset, Commands)
 			return self.rootset.points
 
 		def _has_warp_permission(self, source: MCDR.CommandSource, point: WarpPoint) -> bool:
+			assert isinstance(self.rootset, Commands)
 			return self.rootset._has_warp_permission(source, point)
 
 		@Literal(['list', 'l'])
 		@call_with_root
 		def list(self: Self, source: MCDR.CommandSource):
-			points = [for p in self.points.warp_points if self._has_warp_permission(source, p)]
+			points = [p for p in self.points.warp_points if self._has_warp_permission(source, p)]
 			points.sort(key=lambda p: p.name.upper())
 			send_message(source, BIG_BLOCK_BEFOR)
 			for p in points:
@@ -209,10 +217,10 @@ class Commands(PermCommandSet):
 			elif not self._has_warp_permission(source, point) and not self.has_force_permission(source):
 				send_message(source, MCDR.RText(tr('warp.points.exists'), color=MCDR.RColor.red))
 				return
-			self.points.set_points(WarpPoint(x=x, y=y, z=z, dimension=dimension, name=name,
-				creator=source.player if source.is_player else '',
+			self.points.set_point(WarpPoint(x=x, y=y, z=z, dimension=dimension, name=name,
+				creator=source.player if isinstance(source, MCDR.PlayerCommandSource) else '',
 				permission=1))
-			send_message(source, MCDR.RText(tr('warp.created' if point is None else 'warp.updated', point.name), color=MCDR.RColor.green), log=True)
+			send_message(source, MCDR.RText(tr('warp.created', name) if point is None else tr('warp.updated', point.name), color=MCDR.RColor.green), log=True)
 
 		@Literal(['remove', 'r'])
 		@call_with_root
