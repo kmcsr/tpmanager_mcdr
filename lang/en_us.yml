@@ -23,3 +23,8 @@ tpm:
     reject: REJ
     cancel: CAN
     no_action: There are no any action in progess
+  warp:
+    point: '{name} - [X: {x}, Y: {y}, Z: {z}, D: {dimension}]'
+    points:
+      full: 'Warp point slot is full'
+      exists: 'Warp point {0} is already exists'

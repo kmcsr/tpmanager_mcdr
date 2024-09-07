@@ -1,7 +1,8 @@
 
-import mcdreforged.api.all as MCDR
-
 import time
+from typing import TypeVar
+
+import mcdreforged.api.all as MCDR
 
 from kpi.command import *
 
@@ -34,6 +35,8 @@ def register(server: MCDR.PluginServerInterface):
 			redirects(Commands.askhere.node))
 	server.register_help_message(TpaPrefix, 'Teleport to player')
 	server.register_help_message(TphPrefix, 'Teleport player to you')
+
+Self = TypeVar("Self", bound="Commands")
 
 class Commands(PermCommandSet):
 	Prefix = Prefix
@@ -140,6 +143,52 @@ class Commands(PermCommandSet):
 			send_message(source, MCDR.RText(tr('word.no_action'), color=MCDR.RColor.red))
 			return
 		cb(source)
+
+	def _has_warp_permission(self, source: MCDR.CommandSource, point: WarpPoint) -> bool:
+		return source.has_permission(point.permission) or source.is_player and source.player.lower() == point.creator.lower()
+
+	@Literal(['warp', 'w'])
+	@player_only
+	def warp(self, source: MCDR.PlayerCommandSource):
+		pass
+
+	@Literal(['warps', 'ws'])
+	class warps(PermCommandSet):
+		@call_with_root
+		def has_permission(self: Self, src: MCDR.CommandSource, literal: str) -> bool:
+			return self.config.has_permission(src, 'warp_' + literal)
+
+		@call_with_root
+		def has_force_permission(self: Self, src: MCDR.CommandSource) -> bool:
+			return self.config.has_permission(src, 'warp_config')
+
+		@Literal(['list', 'l'])
+		@call_with_root
+		def list(self: Self, source: MCDR.CommandSource):
+			points = [for p in self.points.warp_points if self._has_warp_permission(source, p)]
+			points.sort(key=lambda p: p.name.upper())
+			send_message(source, BIG_BLOCK_BEFOR)
+			send_message(source, tr('warp.point', x=p.x, y=p.y, z=p.z, dimension=p.dimension, name=p.name))
+			send_message(source, BIG_BLOCK_AFTER)
+
+		@Literal(['set', 'add', 's'])
+		@call_with_root
+		def set(self: Self, source: MCDR.CommandSource, name: str, x: float, y: float, z: float, dimension: str | None):
+			server = source.get_server()
+			# if x is None:
+			# 	if not source.is_player:
+			# 		send_message(source, MCDR.RText(server.rtr('kpi.command.player_only'), color=MCDR.RColor.red))
+			# 		return
+			# 	x, y, z = get_player_pos(source.player)
+			point = self.points.get_point(name)
+			if point is None:
+				if self.points.points_count >= self.points.max_warp_points:
+					send_message(source, MCDR.RText(tr('warp.points.full'), color=MCDR.RColor.red))
+					return
+			elif not source.has_permission(point.permission):
+				send_message(source, MCDR.RText(tr('warp.points.exists'), color=MCDR.RColor.red))
+				return
+			self.has_force_permission()
 
 	def register_accept(self, source: MCDR.PlayerCommandSource, target: str,
 		accept_call, reject_call=None,
