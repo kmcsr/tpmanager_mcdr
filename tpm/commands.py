@@ -80,7 +80,8 @@ class Commands(PermCommandSet):
 	def ask(self, source: MCDR.PlayerCommandSource, target: str):
 		server = source.get_server()
 		name = source.player
-		# TODO: check the target player exists
+		if not is_online(target):
+			send_message(source, MSG_ID, MCDR.RText(tr('tp.player_not_exists'), color=MCDR.RColor.yellow))
 		if not self.register_accept(source, target,
 			lambda: self.execute_teleport_commands(server, target, name),
 			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),
@@ -103,7 +104,8 @@ class Commands(PermCommandSet):
 	def askhere(self, source: MCDR.PlayerCommandSource, target: str):
 		server = source.get_server()
 		name = source.player
-		# TODO: check the target player exists
+		if not is_online(target):
+			send_message(source, MSG_ID, MCDR.RText(tr('tp.player_not_exists'), color=MCDR.RColor.yellow))
 		if not self.register_accept(source, target,
 			lambda: self.execute_teleport_commands(server, name, target),
 			lambda: send_message(source, MSG_ID, MCDR.RText(tr('ask.aborted'), color=MCDR.RColor.red)),

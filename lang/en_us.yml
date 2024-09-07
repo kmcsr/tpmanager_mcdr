@@ -23,6 +23,8 @@ tpm:
     reject: REJ
     cancel: CAN
     no_action: There are no any action in progess
+  tp:
+    player_not_exists: '[WARN] Player {0} is not online'
   warp:
     point: '{name} - [X: {x}, Y: {y}, Z: {z}, D: {dimension}]'
     points:

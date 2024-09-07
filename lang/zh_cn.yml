@@ -23,3 +23,10 @@ tpm:
     reject: 拒绝
     cancel: 取消
     no_action: 当前没有任何进行中的操作
+  tp:
+    player_not_exists: '[WARN] 玩家 {0} 不在线'
+  warp:
+    point: '{name} - [X: {x}, Y: {y}, Z: {z}, D: {dimension}]'
+    points:
+      full: '传送点已满'
+      exists: '传送点 {0} 已存在'

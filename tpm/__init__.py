@@ -24,3 +24,9 @@ def on_unload(server: MCDR.PluginServerInterface):
 	log_info('TP manager is on UNLOAD')
 	api.on_unload(server)
 	GL.destory(server)
+
+def on_player_joined(server: MCDR.PluginServerInterface, player: str, info: MCDR.Info):
+	api.on_player_joined(server, player, info)
+
+def on_player_left(server: MCDR.PluginServerInterface, player: str):
+	api.on_player_left(server, player)
