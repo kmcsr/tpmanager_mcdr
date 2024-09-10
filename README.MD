@@ -9,11 +9,10 @@
 ## Feature
 
 - Teleport between players
+- In game warp points
 
 ## TODO
 
-- Check if target player exists
-- Manage in game way points
 - Linking with login_proxy?
 
 ## Dependencies
