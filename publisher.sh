@@ -28,7 +28,7 @@ cd $(dirname $0)
 echo '==> Checking...'
 echo
 
-mypy . || exit $?
+python3.11 -m mypy . || exit $?
 
 echo '==> Reading plugin metadata...'
 echo

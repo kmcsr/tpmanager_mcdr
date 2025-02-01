@@ -91,8 +91,8 @@ class WarpPoints(JSONStorage):
 				return p
 		return None
 
-def get_config():
-	return TPMConfig.instance
+def get_config() -> TPMConfig:
+	return TPMConfig.instance()
 
 def init(server: MCDR.PluginServerInterface):
 	global BIG_BLOCK_BEFOR, BIG_BLOCK_AFTER
