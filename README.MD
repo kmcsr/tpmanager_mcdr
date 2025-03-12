@@ -35,6 +35,10 @@
 | `!!tp accept`          | Accept the teleport request |
 | `!!tp reject`          | Reject the teleport request |
 | `!!tp cancel`          | Cancel your teleport request |
+| `!!tp warp <point>`    | Teleport to the warp point, aka `!!warp` |
+| `!!tp warps list`      | List all warp points |
+| `!!tp warps add <point> <x> <y> <z> <dimension>` | Add or set a warp point |
+| `!!tp warps remove <point>` | Remove a warp point |
 
 ## Config files
 

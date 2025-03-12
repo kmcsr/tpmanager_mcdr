@@ -35,6 +35,10 @@
 | `!!tp accept`          | 同意传送请求 |
 | `!!tp reject`          | 拒绝传送请求 |
 | `!!tp cancel`          | 取消传送请求 |
+| `!!tp warp <point>`    | 传送到坐标点, `!!warp`同 |
+| `!!tp warps list`      | 列出所有坐标点 |
+| `!!tp warps add <point> <x> <y> <z> <dimension>` | 添加或设置坐标点 |
+| `!!tp warps remove <point>` | 删除坐标点 |
 
 ## 配置文件
 
