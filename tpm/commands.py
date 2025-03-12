@@ -14,6 +14,7 @@ Prefix = '!!tp'
 AlternativePrefix = '!!tpm'
 TpaPrefix = '!!tpa'
 TphPrefix = '!!tph'
+WarpPrefix = '!!warp'
 
 def register(server: MCDR.PluginServerInterface):
 	cfg = get_config()
@@ -36,8 +37,14 @@ def register(server: MCDR.PluginServerInterface):
 			cfg.require_permission(
 				MCDR.Literal(TphPrefix), 'askhere')).
 			redirects(Commands.askhere.node))
+	server.register_command(
+		require_player(
+			cfg.require_permission(
+				MCDR.Literal(WarpPrefix), 'warp')).
+			redirects(Commands.warp.node))
 	server.register_help_message(TpaPrefix, 'Teleport to player')
 	server.register_help_message(TphPrefix, 'Teleport player to you')
+	server.register_help_message(WarpPrefix, 'Warp to warp point')
 
 Self = TypeVar("Self", bound="Commands")
 
