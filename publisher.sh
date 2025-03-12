@@ -33,13 +33,13 @@ python3.11 -m mypy . || exit $?
 echo '==> Reading plugin metadata...'
 echo
 
-_PARSER=$(cat <<EOF
+_PARSER=`cat <<EOF
 import json,sys
 o = json.load(open(sys.argv[1],"r"))
 n, d, v, m = o["name"], o["id"], o["version"], o.get("archive_name")
 print((n.replace(" ", "") if n else d), v if not m else m.format(id=d, version=v), v)
-EOF
-)
+EOF`
+
 _TG='mcdreforged.plugin.json'
 data=($(python3 -c "$_PARSER" "$_TG"))
 if [ $? -ne 0 ]; then

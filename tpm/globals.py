@@ -30,8 +30,9 @@ class TPMConfig(Config, msg_id=MSG_ID):
 		accept: int  = 1
 		reject: int  = 0
 		cancel: int  = 0
-		warp: int = 1
-		warp_set: int = 2
+		warp: int    = 1
+
+		warp_set: int    = 2
 		warp_remove: int = 2
 		warp_config: int = 3
 

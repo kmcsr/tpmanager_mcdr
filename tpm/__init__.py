@@ -6,6 +6,7 @@ from . import globals as GL
 from .utils import *
 from . import commands as CMD
 from . import api
+from .api import *
 
 __all__ = []
 

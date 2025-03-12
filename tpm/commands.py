@@ -163,7 +163,7 @@ class Commands(PermCommandSet):
 		server = source.get_server()
 		point = self.points.get_point(name)
 		if point is None:
-			send_message(source, MCDR.RText(tr('warp.points.not_exists'), color=MCDR.RColor.red))
+			send_message(source, MCDR.RText(tr('warp.points.not_exists', name), color=MCDR.RColor.red))
 			return
 		if not self._has_warp_permission(source, point):
 			send_message(source, MCDR.RText(tr('warp.points.no_permission'), color=MCDR.RColor.red))
