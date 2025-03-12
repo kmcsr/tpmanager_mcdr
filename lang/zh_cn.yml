@@ -2,13 +2,17 @@ tpm:
   help_msg: |-
     {0} help :显示这条帮助信息
     {0} pos <x> <y> <z> :传送到指定坐标
-    {0} ask <player>:请求将你传送到他人
+    {0} ask <player> :请求将你传送到他人
       同{tpa}
-    {0} askhere <player>:请求他人传送到你
+    {0} askhere <player> :请求他人传送到你
       同{tph}
     {0} accept :同意传送请求
     {0} reject :拒绝传送请求
     {0} cancel :取消传送请求
+    {0} warp <point> :传送到坐标点
+    {0} warps list :列出所有坐标点
+    {0} warps add <point> <x> <y> <z> <dimension> :添加或设置坐标点
+    {0} warps remove <point> :删除坐标点
   ask:
     sending: '您的传送请求已发送给{0}...'
     aborted: '您的传送请求已终止'
@@ -28,6 +32,7 @@ tpm:
     point: '{name} - [X: {x}, Y: {y}, Z: {z}, D: {dimension}]'
     points:
       full: '传送点已满'
+      full_per_player: '您的个人传送点已满 ({count}/{limit})'
       exists: '传送点 {0} 已存在'
       not_exists: '传送点 {0} 不存在'
     teleporting: '正在传送到 {name}'

@@ -6,7 +6,7 @@ import mcdreforged.api.all as MCDR
 
 from kpi.command import *
 
-from .globals import *
+from .configs import *
 from .utils import *
 from .api import *
 
@@ -191,6 +191,9 @@ class Commands(PermCommandSet):
 			assert isinstance(self.rootset, Commands)
 			return self.rootset._has_warp_permission(source, point)
 
+		def default(self, source: MCDR.CommandSource):
+			self.list(self, source)
+
 		@Literal(['list', 'l'])
 		@call_with_root
 		def list(self: Self, source: MCDR.CommandSource):
@@ -214,6 +217,13 @@ class Commands(PermCommandSet):
 				if self.points.points_count >= self.points.max_warp_points:
 					send_message(source, MCDR.RText(tr('warp.points.full'), color=MCDR.RColor.red))
 					return
+				if isinstance(source, MCDR.PlayerCommandSource) and not self.has_force_permission(source):
+					player_points_count = self.points.get_player_point_used(source.player)
+					if player_points_count >= self.points.max_warp_points_per_player:
+						send_message(source, MCDR.RText(tr('warp.points.full_per_player',
+								count=player_points_count, limit=self.points.max_warp_points_per_player),
+							color=MCDR.RColor.red))
+						return
 			elif not self._has_warp_permission(source, point) and not self.has_force_permission(source):
 				send_message(source, MCDR.RText(tr('warp.points.exists'), color=MCDR.RColor.red))
 				return

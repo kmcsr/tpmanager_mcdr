@@ -2,13 +2,17 @@ tpm:
   help_msg: |-
     {0} help :Show this help message
     {0} pos <x> <y> <z> :Teleport to target position
-    {0} ask <player>:Teleport you to somebody
+    {0} ask <player> :Teleport you to somebody
       aka {tpa}
-    {0} askhere <player>:Teleport somebody to you
+    {0} askhere <player> :Teleport somebody to you
       aka {tph}
     {0} accept :Accept teleport request
     {0} reject :Reject teleport request
     {0} cancel :Cancel your teleport request
+    {0} warp <point> :Teleport to the warp point
+    {0} warps list :List all warp points
+    {0} warps add <point> <x> <y> <z> <dimension> :Add or set a warp point
+    {0} warps remove <point> :Remove a warp point
   ask:
     sending: 'Your teleport request is sending to {0}...'
     aborted: 'Your teleport request was aborted'
@@ -28,6 +32,7 @@ tpm:
     point: '{name} - [X: {x}, Y: {y}, Z: {z}, D: {dimension}]'
     points:
       full: 'Warp point slot is full'
+      full_per_player: 'Your personal warp point slot is full ({count}/{limit})'
       exists: 'Warp point {0} is already exists'
       not_exists: 'Warp point {0} is not exists'
     teleporting: 'Teleporing to {name}'
