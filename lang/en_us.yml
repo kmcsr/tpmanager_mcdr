@@ -29,6 +29,7 @@ tpm:
     cancel: CAN
     no_action: There are no any action in progess
   warp:
+    disabled: 'Warp system is not enabled'
     point: '{name} - [X: {x}, Y: {y}, Z: {z}, D: {dimension}]'
     points:
       full: 'Warp point slot is full'

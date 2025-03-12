@@ -168,6 +168,9 @@ class Commands(PermCommandSet):
 	@player_only
 	def warp(self, source: MCDR.PlayerCommandSource, name: str):
 		server = source.get_server()
+		if not self.config.enable_wrap:
+			send_message(source, MCDR.RText(tr('warp.disabled'), color=MCDR.RColor.red))
+			return
 		point = self.points.get_point(name)
 		if point is None:
 			send_message(source, MCDR.RText(tr('warp.points.not_exists', name), color=MCDR.RColor.red))

@@ -29,6 +29,7 @@ tpm:
     cancel: 取消
     no_action: 当前没有任何进行中的操作
   warp:
+    disabled: '传送点系统未启用'
     point: '{name} - [X: {x}, Y: {y}, Z: {z}, D: {dimension}]'
     points:
       full: '传送点已满'
