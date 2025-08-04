@@ -1,6 +1,6 @@
 {
   "id": "tpm",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "name": "TpManager",
   "description": {
     "en_us": "A Minecraft teleport manager",
